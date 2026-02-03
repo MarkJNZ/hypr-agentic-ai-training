@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from config_service.db import init_db, execute_query
 
 @pytest.mark.asyncio
-@patch("psycopg2.pool.ThreadedConnectionPool")
+@patch("config_service.db.ThreadedConnectionPool")
 async def test_init_db(mock_pool_class):
     with patch("config_service.db.settings") as mock_settings:
         mock_settings.db_url = "postgresql://user:pass@localhost/db"

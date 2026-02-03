@@ -1,15 +1,19 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
+import ulid
 from pydantic_extra_types.ulid import ULID
 from config_service.api.routers import create_application, get_application
 from config_service.models import ApplicationCreate
 
 @pytest.mark.asyncio
-@patch("config_service.api.routers.execute_query")
-@patch("config_service.api.routers.ULID")
-async def test_create_application(mock_ulid, mock_execute):
-    mock_ulid.return_value = ULID()
-    mock_execute.return_value = [{"id": str(mock_ulid.return_value)}]
+@patch("config_service.api.routers.execute_query", new_callable=AsyncMock)
+
+async def test_create_application(mock_execute):
+    async def side_effect(query, params=None):
+        if "RETURNING id" in query and params:
+            return [{"id": params[0]}]
+        return []
+    mock_execute.side_effect = side_effect
     app_data = ApplicationCreate(name="test-app", comments="test-comment")
     
     # We also need to mock init_db since it's called in get_db_cursor or similar helpers
@@ -20,12 +24,12 @@ async def test_create_application(mock_ulid, mock_execute):
     assert mock_execute.called
 
 @pytest.mark.asyncio
-@patch("config_service.api.routers.execute_query")
+@patch("config_service.api.routers.execute_query", new_callable=AsyncMock)
 async def test_get_application_not_found(mock_execute):
     mock_execute.return_value = []
-    ulid = ULID()
+    app_id = str(ulid.ULID())
     
     with pytest.raises(Exception) as excinfo:
-        await get_application(ulid)
+        await get_application(app_id)
     # FastAPI raises HTTPException but here we call it directly
     # In a real test with TestClient it would be 404

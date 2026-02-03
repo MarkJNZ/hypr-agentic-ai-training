@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic_extra_types.ulid import ULID
+import ulid
 
 from ..db import execute_query
 from ..models import (
@@ -14,10 +15,10 @@ router = APIRouter()
 
 @router.post("/applications", response_model=Application)
 async def create_application(app: ApplicationCreate):
-    ulid = ULID()
+    app_id = ulid.ULID()
     query = "INSERT INTO applications (id, name, comments) VALUES (%s, %s, %s) RETURNING id"
-    await execute_query(query, (str(ulid), app.name, app.comments))
-    return Application(id=ulid, **app.model_dump())
+    await execute_query(query, (str(app_id), app.name, app.comments))
+    return Application(id=str(app_id), **app.model_dump())
 
 @router.get("/applications/{id}", response_model=Application)
 async def get_application(id: str):
@@ -55,7 +56,7 @@ async def update_application(id: str, app: ApplicationUpdate):
 
 @router.post("/configurations", response_model=Configuration)
 async def create_configuration(config: ConfigurationCreate):
-    ulid = ULID()
+    config_id = ulid.ULID()
     query = """
     INSERT INTO configurations (id, application_id, name, comments, config)
     VALUES (%s, %s, %s, %s, %s)
@@ -63,11 +64,11 @@ async def create_configuration(config: ConfigurationCreate):
     """
     from json import dumps
     try:
-        await execute_query(query, (str(ulid), str(config.application_id), config.name, config.comments, dumps(config.config)))
+        await execute_query(query, (str(config_id), str(config.application_id), config.name, config.comments, dumps(config.config)))
     except Exception as e:
         # Check for unique constraint or foreign key errors
         raise HTTPException(status_code=400, detail=str(e))
-    return Configuration(id=ulid, **config.model_dump())
+    return Configuration(id=str(config_id), **config.model_dump())
 
 @router.get("/configurations/{id}", response_model=Configuration)
 async def get_configuration(id: str):
