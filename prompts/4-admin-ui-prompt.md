@@ -1,6 +1,6 @@
 # Admin UI Prompt
 
-Create an implementation plan for an admin web interface that has features for adding and updating application entries as well as adding and updating the configuration name/value pairs.
+Create an implementation plan for an admin web interface that has features for adding and updating application entries as well as adding and updating the configuration name/value pairs. 
 
 ## Requirements
 ### API Endpoints
@@ -60,6 +60,7 @@ Create an implementation plan for an admin web interface that has features for a
 
 ### Development 
 **Project Structure**
+- Add project structure to the implementation plan with /ui as the root folder for the ui files 
 - Clear separation of components, services, and utilities
 - TypeScript interfaces for all data models
 - Comprehensive test coverage (unit and integration)
