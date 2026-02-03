@@ -31,4 +31,4 @@
 - Input: prompts/3-web-api-plan.md
 - Output: config-service/
 - Cost: High
-- Reflections: Ran into issues with installing and finding uv for package installation. Also initially ran into unit test failures which the agent resolved. There was a significant number of reviews required for suggested changes while the agent attempting to resolve these issues. 
+- Reflections: Ran into issues with installing and finding uv for package installation. Also experienced failed tests. There was a significant number of reviews required for suggested changes while the agent attempting to resolve these issues. 
