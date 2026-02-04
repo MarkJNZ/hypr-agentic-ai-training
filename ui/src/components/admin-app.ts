@@ -3,6 +3,7 @@ import './app-form';
 import './app-detail';
 import './confirmation-dialog';
 import './toast-notification';
+import './config-editor';
 
 export class AdminApp extends HTMLElement {
   connectedCallback() {
