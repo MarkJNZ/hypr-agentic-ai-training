@@ -52,6 +52,19 @@ async def update_application(id: str, app: ApplicationUpdate):
         raise HTTPException(status_code=404, detail="Application not found")
     return Application(**rows[0], configuration_ids=[])
 
+@router.delete("/applications/{id}", status_code=204)
+async def delete_application(id: str):
+    query = """
+    WITH deleted_configs AS (
+        DELETE FROM configurations WHERE application_id = %s
+    )
+    DELETE FROM applications WHERE id = %s RETURNING id
+    """
+    rows = await execute_query(query, (id, id))
+    if not rows:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return
+
 # Configurations Endpoints
 
 @router.post("/configurations", response_model=Configuration)

@@ -116,3 +116,13 @@
 - Input: ui/vite.config.ts
 - Output: ui/vite.config.ts
 - Reflections: Although `api.ts` was updated to send requests to `/api/v1/...`, the Vite proxy configuration was stripping the `/api` prefix, resulting in requests to `/v1/...` which failed. Removed the `rewrite` rule from `vite.config.ts` to ensure that requests to `/api/...` are proxied correctly to `http://localhost:8000/api/...`, preserving the full path structure expected by the backend.
+
+## Journal Entry 12: Fix 405 Error on Application Deletion
+
+- Prompt: Deleting an application in http://localhost:5174/#apps and confirming action in the popup dialogue in the ui returns a 405 method not allowed error, please fix this
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: config-service/src/config_service/api/routers.py
+- Output: config-service/src/config_service/api/routers.py
+- Reflections: Debugged a 405 Method Not Allowed error when deleting applications. The backend was missing the `DELETE` endpoint for applications. Implemented the `@router.delete("/applications/{id}")` endpoint in `routers.py`. Added logic to delete associated configurations using a Common Table Expression (CTE) to handle the deletion atomically, as there was no ON DELETE CASCADE in the schema. Verified the fix by creating a test application and successfully deleting it via the API.
