@@ -4,7 +4,7 @@ interface RequestOptions extends RequestInit {
 
 export class ApiService {
     private static async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-        const url = `/api${endpoint}`;
+        const url = `/api/v1${endpoint}`;
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers,

@@ -96,3 +96,23 @@
 - Input: config-service/
 - Output: config-service/src/config_service/models.py, config-service/reproduce_issue.py
 - Reflections: Debugged a 422 error on `POST /configurations`. Identified two issues: library rejected lowercase ULIDs, and API missed camelCase aliases in request bodies. Updated `models.py` with a `BeforeValidator` for flexible ULID parsing and `alias_generator` for camelCase support. Verified with a reproduction script.
+
+## Journal Entry 10: Fix 404 Error on Application Creation
+
+- Prompt: the ui returns a 404 not found response when creating an application and consuming the /applications POST endpoint, fix this
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: ui/src/services/api.ts
+- Output: ui/src/services/api.ts
+- Reflections: Debugged a 404 error when creating applications from the UI. Identified that the UI was making requests to `/api/applications` (proxied to `/applications`), but the backend was configured with a global prefix `/api/v1`, expecting `/api/v1/applications`. The `ApiService` in the UI was missing the `/v1` segment in its base URL construction. Updated `ui/src/services/api.ts` to prepend `/api/v1` to all requests, ensuring alignment with the backend configuration. This fix applies to all API endpoints consumed by the UI.
+
+## Journal Entry 11: Fix 404 Error (Proxy Configuration)
+
+- Prompt: create application in http://localhost:5174/#apps/create in the ui returns a status code of 404, resolve this
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: ui/vite.config.ts
+- Output: ui/vite.config.ts
+- Reflections: Although `api.ts` was updated to send requests to `/api/v1/...`, the Vite proxy configuration was stripping the `/api` prefix, resulting in requests to `/v1/...` which failed. Removed the `rewrite` rule from `vite.config.ts` to ensure that requests to `/api/...` are proxied correctly to `http://localhost:8000/api/...`, preserving the full path structure expected by the backend.
