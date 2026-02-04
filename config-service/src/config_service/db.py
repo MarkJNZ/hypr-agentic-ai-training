@@ -77,7 +77,9 @@ async def execute_query(query: str, params: tuple | None = None):
             with conn.cursor() as cur:
                 cur.execute(query, params)
                 if cur.description:
-                    return cur.fetchall()
+                    result = cur.fetchall()
+                    conn.commit()
+                    return result
                 conn.commit()
                 return None
         except Exception:

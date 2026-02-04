@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
-from pydantic_extra_types.ulid import ULID
+from typing import Any, Dict, List, Optional, Annotated
+from pydantic import BaseModel, Field, PlainSerializer
+from pydantic_extra_types.ulid import ULID as _ULID
+
+ULID = Annotated[_ULID, PlainSerializer(lambda x: str(x), return_type=str, when_used='json')]
 
 class ApplicationBase(BaseModel):
     name: str = Field(..., max_length=256)

@@ -66,3 +66,13 @@
 - Reflections: Setting up the full stack development environment. Identified config-service using FastAPI/Uvicorn and Postgres. UI using Vite. Ensuring all services are running and connected.
 
 
+
+## Journal Entry 7: Fix 500 Error in POST /applications
+
+- Prompt: creating a application using the config-service endpoint /applications POST is failing returning error code 500 internal server error, fix this
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: config-service/
+- Output: config-service/reproduce_500.py, config-service/src/config_service/models.py
+- Reflections: Debugged a 500 error in the config-service. Created a reproduction script which confirmed the issue. Identified that `ulid.ULID` objects were not being correctly serialized to JSON by Pydantic. Added a `PlainSerializer` to the `ULID` type in `models.py` to fix the issue. Verified the fix with the reproduction script.
