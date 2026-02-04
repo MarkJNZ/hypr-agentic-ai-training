@@ -76,3 +76,13 @@
 - Input: config-service/
 - Output: config-service/reproduce_500.py, config-service/src/config_service/models.py
 - Reflections: Debugged a 500 error in the config-service. Created a reproduction script which confirmed the issue. Identified that `ulid.ULID` objects were not being correctly serialized to JSON by Pydantic. Added a `PlainSerializer` to the `ULID` type in `models.py` to fix the issue. Verified the fix with the reproduction script.
+
+## Journal Entry 8: Fix Empty Body in GET /applications
+
+- Prompt: config-service endpoint /applications GET command does not work, it returns a 200 status code but the body is empty
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: config-service/
+- Output: config-service/src/config_service/db.py
+- Reflections: Debugged an issue where `GET /applications` returned an empty body after a successful POST. The root cause was in `db.py`: `execute_query` was not committing transactions when the query returned rows (like `INSERT ... RETURNING`), causing the data to be lost. Existing unit tests passed because they mocked the database layer, masking the transaction commit issue. Created a reproduction script to confirm the bug and verify the fix. Modifying `execute_query` to commit even when rows are returned solved the problem.
