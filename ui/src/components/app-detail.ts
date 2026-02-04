@@ -3,54 +3,54 @@ import { Application, Configuration } from '../models/types';
 import { showToast } from './toast-notification';
 
 export class AppDetail extends HTMLElement {
-    private appId: string | null = null;
-    private app: Application | null = null;
-    private configs: Configuration[] = [];
+  private appId: string | null = null;
+  private app: Application | null = null;
+  private configs: Configuration[] = [];
 
-    static get observedAttributes() {
-        return ['app-id'];
+  static get observedAttributes() {
+    return ['app-id'];
+  }
+
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    if (name === 'app-id' && oldValue !== newValue) {
+      this.appId = newValue;
+      this.fetchData();
     }
+  }
 
-    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        if (name === 'app-id' && oldValue !== newValue) {
-            this.appId = newValue;
-            this.fetchData();
-        }
+  async connectedCallback() {
+    this.attachShadow({ mode: 'open' });
+    this.render(); // Initial render
+    if (this.appId) {
+      await this.fetchData();
     }
+  }
 
-    async connectedCallback() {
-        this.attachShadow({ mode: 'open' });
-        this.render(); // Initial render
-        if (this.appId) {
-            await this.fetchData();
-        }
+  async fetchData() {
+    if (!this.appId) return;
+    try {
+      this.app = await ApiService.get<Application>(`/applications/${this.appId}`);
+      this.render(); // Re-render with app info
+
+      if (this.app && this.app.configurationIds && this.app.configurationIds.length > 0) {
+        // Parallel fetch of configs
+        const promises = this.app.configurationIds.map(id =>
+          ApiService.get<Configuration>(`/configurations/${id}`).catch(() => null)
+        );
+        const results = await Promise.all(promises);
+        this.configs = results.filter(c => c !== null) as Configuration[];
+        this.renderConfigs();
+      } else {
+        this.configs = [];
+        this.renderConfigs();
+      }
+    } catch (error: any) {
+      showToast(error.message, 'error');
     }
+  }
 
-    async fetchData() {
-        if (!this.appId) return;
-        try {
-            this.app = await ApiService.get<Application>(`/applications/${this.appId}`);
-            this.render(); // Re-render with app info
-
-            if (this.app && this.app.configuration_ids && this.app.configuration_ids.length > 0) {
-                // Parallel fetch of configs
-                const promises = this.app.configuration_ids.map(id =>
-                    ApiService.get<Configuration>(`/configurations/${id}`).catch(() => null)
-                );
-                const results = await Promise.all(promises);
-                this.configs = results.filter(c => c !== null) as Configuration[];
-                this.renderConfigs();
-            } else {
-                this.configs = [];
-                this.renderConfigs();
-            }
-        } catch (error: any) {
-            showToast(error.message, 'error');
-        }
-    }
-
-    render() {
-        this.shadowRoot!.innerHTML = `
+  render() {
+    this.shadowRoot!.innerHTML = `
       <style>
         :host { display: block; }
         .header { margin-bottom: 2rem; }
@@ -109,21 +109,21 @@ export class AppDetail extends HTMLElement {
       <confirmation-dialog id="confirm"></confirmation-dialog>
     `;
 
-        this.shadowRoot!.getElementById('add-config')?.addEventListener('click', () => {
-            if (this.appId) window.location.hash = `configs/create/${this.appId}`;
-        });
+    this.shadowRoot!.getElementById('add-config')?.addEventListener('click', () => {
+      if (this.appId) window.location.hash = `configs/create/${this.appId}`;
+    });
+  }
+
+  renderConfigs() {
+    const container = this.shadowRoot!.getElementById('config-list');
+    if (!container) return;
+
+    if (this.configs.length === 0) {
+      container.innerHTML = '<div class="no-data">No configurations found.</div>';
+      return;
     }
 
-    renderConfigs() {
-        const container = this.shadowRoot!.getElementById('config-list');
-        if (!container) return;
-
-        if (this.configs.length === 0) {
-            container.innerHTML = '<div class="no-data">No configurations found.</div>';
-            return;
-        }
-
-        container.innerHTML = `
+    container.innerHTML = `
       <table>
         <thead>
           <tr>
@@ -147,32 +147,32 @@ export class AppDetail extends HTMLElement {
       </table>
     `;
 
-        container.querySelectorAll('.ed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = (e.target as HTMLElement).dataset.id;
-                window.location.hash = `configs/edit/${id}`;
-            });
-        });
+    container.querySelectorAll('.ed-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).dataset.id;
+        window.location.hash = `configs/edit/${id}`;
+      });
+    });
 
-        container.querySelectorAll('.del-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = (e.target as HTMLElement).dataset.id;
-                this.confirmDelete(id!);
-            });
-        });
-    }
+    container.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).dataset.id;
+        this.confirmDelete(id!);
+      });
+    });
+  }
 
-    confirmDelete(id: string) {
-        const dialog = this.shadowRoot!.getElementById('confirm') as any;
-        dialog.open('Are you sure you want to delete this configuration?', async () => {
-            try {
-                await ApiService.delete(`/configurations/${id}`);
-                showToast('Configuration deleted');
-                await this.fetchData(); // Reload
-            } catch (e: any) {
-                showToast(e.message, 'error');
-            }
-        });
-    }
+  confirmDelete(id: string) {
+    const dialog = this.shadowRoot!.getElementById('confirm') as any;
+    dialog.open('Are you sure you want to delete this configuration?', async () => {
+      try {
+        await ApiService.delete(`/configurations/${id}`);
+        showToast('Configuration deleted');
+        await this.fetchData(); // Reload
+      } catch (e: any) {
+        showToast(e.message, 'error');
+      }
+    });
+  }
 }
 customElements.define('app-detail', AppDetail);

@@ -136,3 +136,13 @@
 - Input: ui/src/components/admin-app.ts
 - Output: ui/src/components/admin-app.ts
 - Reflections: Debugged a blank page issue when navigating to the 'Create Configuration' route. Identified that the `config-editor` web component was not being imported in the main routing file `admin-app.ts`, preventing the browser from rendering the component. Added the missing import `import './config-editor';` to `admin-app.ts`. Also verified that the component correctly constructs the payload and calls the `POST /configurations` endpoint as expected by the backend.
+
+## Journal Entry 14: Fix Configuration List Display
+
+- Prompt: list config in cpnfig list for applicationhttp://localhost:5173/#apps/01KGKHZYVMQBQ9Z159W09K4706 in the ui is not displaying a list of config for the application id. The config service endpoints are functioning as expected so this looks like an issue with the ui application, please fix this
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Flash
+- Input: ui/src/models/types.ts, ui/src/components/app-detail.ts, ui/src/components/config-editor.ts
+- Output: ui/src/models/types.ts, ui/src/components/app-detail.ts, ui/src/components/config-editor.ts
+- Reflections: Identified a naming mismatch between the backend and UI. The backend returns camelCase properties (e.g., `configurationIds`, `applicationId`) due to Pydantic alias generation, but the UI was coded to expect snake_case. Updated the TypeScript interfaces and the `AppDetail` and `ConfigEditor` components to use camelCase, which fixed the data binding issue and restored the display of configurations.

@@ -39,7 +39,7 @@ export class ConfigEditor extends HTMLElement {
             try {
                 const config = await ApiService.get<Configuration>(`/configurations/${this.configId}`);
                 if (config) {
-                    this.appId = config.application_id; // Set appId for back nav
+                    this.appId = config.applicationId; // Set appId for back nav
                     this.populateForm(config);
                 }
             } catch (e: any) {
@@ -281,7 +281,7 @@ export class ConfigEditor extends HTMLElement {
                 showToast('Configuration updated');
             } else {
                 if (!this.appId) throw new Error('Application ID missing');
-                const create: ConfigurationCreate = { application_id: this.appId, name, comments, config: configData };
+                const create: ConfigurationCreate = { applicationId: this.appId, name, comments, config: configData };
                 await ApiService.post('/configurations', create);
                 showToast('Configuration created');
             }

@@ -2,7 +2,7 @@ export interface Application {
     id: string;
     name: string;
     comments: string;
-    configuration_ids?: string[];
+    configurationIds?: string[];
 }
 
 export interface ApplicationCreate {
@@ -17,14 +17,14 @@ export interface ApplicationUpdate {
 
 export interface Configuration {
     id: string;
-    application_id: string;
+    applicationId: string;
     name: string;
     comments: string;
     config: Record<string, any>;
 }
 
 export interface ConfigurationCreate {
-    application_id: string;
+    applicationId: string;
     name: string;
     comments: string;
     config: Record<string, any>;
