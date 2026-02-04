@@ -146,3 +146,13 @@
 - Input: ui/src/models/types.ts, ui/src/components/app-detail.ts, ui/src/components/config-editor.ts
 - Output: ui/src/models/types.ts, ui/src/components/app-detail.ts, ui/src/components/config-editor.ts
 - Reflections: Identified a naming mismatch between the backend and UI. The backend returns camelCase properties (e.g., `configurationIds`, `applicationId`) due to Pydantic alias generation, but the UI was coded to expect snake_case. Updated the TypeScript interfaces and the `AppDetail` and `ConfigEditor` components to use camelCase, which fixed the data binding issue and restored the display of configurations.
+
+## Journal Entry 15: Remove Configuration Delete Buttons
+
+- Prompt: remove the delete buttons from the config list in the ui at http://localhost:5173/#apps/01KGKHZYVMQBQ9Z159W09K4706 as there is no config-service endpoint for this delete action
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: ui/src/components/app-detail.ts
+- Output: ui/src/components/app-detail.ts
+- Reflections: Removed the "Delete" buttons from the configuration list in the application details view because the backend `config-service` does not support deleting individual configurations. Updated `app-detail.ts` to remove the UI elements, their associated event listeners, and the unused `confirmDelete` method and `<confirmation-dialog>` element. Fixed minor syntax errors that occurred during the cleanup process.

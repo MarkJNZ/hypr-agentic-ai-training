@@ -105,8 +105,6 @@ export class AppDetail extends HTMLElement {
       <div id="config-list">
         <p>Loading configurations...</p>
       </div>
-      
-      <confirmation-dialog id="confirm"></confirmation-dialog>
     `;
 
     this.shadowRoot!.getElementById('add-config')?.addEventListener('click', () => {
@@ -139,7 +137,6 @@ export class AppDetail extends HTMLElement {
               <td>${c.comments}</td>
               <td>
                 <button class="btn-sm ed-btn" data-id="${c.id}">Edit</button>
-                <button class="btn-sm btn-danger del-btn" data-id="${c.id}">Delete</button>
               </td>
             </tr>
           `).join('')}
@@ -154,25 +151,6 @@ export class AppDetail extends HTMLElement {
       });
     });
 
-    container.querySelectorAll('.del-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.target as HTMLElement).dataset.id;
-        this.confirmDelete(id!);
-      });
-    });
-  }
-
-  confirmDelete(id: string) {
-    const dialog = this.shadowRoot!.getElementById('confirm') as any;
-    dialog.open('Are you sure you want to delete this configuration?', async () => {
-      try {
-        await ApiService.delete(`/configurations/${id}`);
-        showToast('Configuration deleted');
-        await this.fetchData(); // Reload
-      } catch (e: any) {
-        showToast(e.message, 'error');
-      }
-    });
   }
 }
 customElements.define('app-detail', AppDetail);
