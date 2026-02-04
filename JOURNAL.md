@@ -55,4 +55,14 @@
 - Input: prompts/5-admin-ui-plan.md
 - Output: ui/
 
+## Journal Entry 6: Development Environment Setup
+
+- Prompt: setup development environment including config-service the postgres database and the ui
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: N/A
+- Output: N/A
+- Reflections: Setting up the full stack development environment. Identified config-service using FastAPI/Uvicorn and Postgres. UI using Vite. Ensuring all services are running and connected.
+
 
