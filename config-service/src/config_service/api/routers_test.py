@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 import ulid
 from pydantic_extra_types.ulid import ULID
-from config_service.api.routers import create_application, get_application
+from config_service.api.routers import create_application, get_application, delete_configuration
 from config_service.models import ApplicationCreate
 
 @pytest.mark.asyncio
@@ -33,3 +33,14 @@ async def test_get_application_not_found(mock_execute):
         await get_application(app_id)
     # FastAPI raises HTTPException but here we call it directly
     # In a real test with TestClient it would be 404
+
+@pytest.mark.asyncio
+@patch("config_service.api.routers.execute_query", new_callable=AsyncMock)
+async def test_delete_configuration(mock_execute):
+    mock_execute.return_value = [{"id": "some-id"}]
+    
+    await delete_configuration("some-id")
+    
+    assert mock_execute.called
+    args, _ = mock_execute.call_args
+    assert "DELETE FROM configurations" in args[0]

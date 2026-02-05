@@ -9,7 +9,7 @@ from .migrations import run_migrations
 async def lifespan(app: FastAPI):
     # Startup
     init_db()
-    await run_migrations()
+    # await run_migrations()
     yield
     # Shutdown
     close_db()
@@ -20,6 +20,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+
 
 app.include_router(api_router, prefix="/api/v1")
 

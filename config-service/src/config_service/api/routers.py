@@ -9,6 +9,8 @@ from ..models import (
     Configuration, ConfigurationCreate, ConfigurationUpdate
 )
 
+
+
 router = APIRouter()
 
 # Applications Endpoints
@@ -97,8 +99,8 @@ async def update_configuration(id: str, config: ConfigurationUpdate):
     query = """
     UPDATE configurations 
     SET name = COALESCE(%s, name), 
-        comments = COALESCE(%s, comments),
-        config = COALESCE(%s, config)
+    comments = COALESCE(%s, comments),
+    config = COALESCE(%s, config)
     WHERE id = %s
     RETURNING *
     """
@@ -107,3 +109,11 @@ async def update_configuration(id: str, config: ConfigurationUpdate):
     if not rows:
         raise HTTPException(status_code=404, detail="Configuration not found")
     return Configuration(**rows[0])
+
+@router.delete("/configurations/{id}", status_code=204, response_model=None)
+async def delete_configuration(id: str):
+    query = "DELETE FROM configurations WHERE id = %s RETURNING id"
+    rows = await execute_query(query, (id,))
+    if not rows:
+        raise HTTPException(status_code=404, detail="Configuration not found")
+    return

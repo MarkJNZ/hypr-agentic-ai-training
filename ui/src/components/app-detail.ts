@@ -1,6 +1,7 @@
 import { ApiService } from '../services/api';
 import { Application, Configuration } from '../models/types';
 import { showToast } from './toast-notification';
+import { ConfirmationDialog } from './confirmation-dialog';
 
 export class AppDetail extends HTMLElement {
   private appId: string | null = null;
@@ -87,6 +88,7 @@ export class AppDetail extends HTMLElement {
       </style>
       
       <div class="header">
+        <confirmation-dialog id="confirm-dialog"></confirmation-dialog>
         <a href="#apps" style="text-decoration: none; color: #6b7280; font-size: 0.875rem;">&larr; Back to Apps</a>
         ${this.app ? `
             <div style="margin-top: 1rem;">
@@ -137,6 +139,7 @@ export class AppDetail extends HTMLElement {
               <td>${c.comments}</td>
               <td>
                 <button class="btn-sm ed-btn" data-id="${c.id}">Edit</button>
+                <button class="btn-sm btn-danger del-btn" data-id="${c.id}">Delete</button>
               </td>
             </tr>
           `).join('')}
@@ -148,6 +151,27 @@ export class AppDetail extends HTMLElement {
       btn.addEventListener('click', (e) => {
         const id = (e.target as HTMLElement).dataset.id;
         window.location.hash = `configs/edit/${id}`;
+      });
+    });
+
+    container.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).dataset.id;
+        const dialog = this.shadowRoot!.getElementById('confirm-dialog') as ConfirmationDialog;
+        dialog.open(
+          'Are you sure you want to delete this configuration?',
+          async () => {
+            try {
+              await ApiService.delete(`/configurations/${id}`);
+              this.configs = this.configs.filter(c => c.id !== id);
+              this.renderConfigs();
+              showToast('Configuration deleted', 'success');
+            } catch (error: any) {
+              showToast(error.message, 'error');
+            }
+          },
+          'Delete Configuration'
+        );
       });
     });
 
