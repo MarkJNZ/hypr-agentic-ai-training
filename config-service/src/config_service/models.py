@@ -48,3 +48,11 @@ class Configuration(ConfigurationBase):
     id: ULID
 
     model_config = ConfigDict(from_attributes=True, alias_generator=to_camel, populate_by_name=True)
+
+class User(BaseModel):
+    id: int
+    username: str
+    password_hash: str
+
+class Token(BaseModel):
+    token: str

@@ -1,29 +1,56 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from pydantic_extra_types.ulid import ULID
 import ulid
 
 from ..db import execute_query
 from ..models import (
     Application, ApplicationCreate, ApplicationUpdate,
-    Configuration, ConfigurationCreate, ConfigurationUpdate
+    Configuration, ConfigurationCreate, ConfigurationUpdate,
+    User, Token
 )
+from ..auth import create_basic_auth_token, get_current_user, verify_password, get_password_hash
+
 
 
 
 router = APIRouter()
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@router.post("/login", response_model=Token)
+async def login(login_request: LoginRequest):
+    # We verify against the DB
+    query = "SELECT * FROM users WHERE username = %s"
+    rows = await execute_query(query, (login_request.username,))
+    
+    if not rows:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    user_data = rows[0]
+    # In a real app, use the verify_password from auth which hashes
+    # Here just calling verify_password
+    if not verify_password(login_request.password, user_data["password_hash"]):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    token = create_basic_auth_token(login_request.username, login_request.password)
+    return Token(token=token)
+
 # Applications Endpoints
 
 @router.post("/applications", response_model=Application)
-async def create_application(app: ApplicationCreate):
+async def create_application(app: ApplicationCreate, current_user: User = Depends(get_current_user)):
+
     app_id = ulid.ULID()
     query = "INSERT INTO applications (id, name, comments) VALUES (%s, %s, %s) RETURNING id"
     await execute_query(query, (str(app_id), app.name, app.comments))
     return Application(id=str(app_id), **app.model_dump())
 
 @router.get("/applications/{id}", response_model=Application)
-async def get_application(id: str):
+async def get_application(id: str, current_user: User = Depends(get_current_user)):
     query = "SELECT * FROM applications WHERE id = %s"
     rows = await execute_query(query, (id,))
     if not rows:
@@ -37,7 +64,7 @@ async def get_application(id: str):
     return Application(**rows[0], configuration_ids=config_ids)
 
 @router.get("/applications", response_model=List[Application])
-async def list_applications():
+async def list_applications(current_user: User = Depends(get_current_user)):
     query = "SELECT * FROM applications"
     rows = await execute_query(query)
     # Note: In a real app we'd likely want to join or batch fetch config IDs
@@ -47,7 +74,7 @@ async def list_applications():
     return results
 
 @router.put("/applications/{id}", response_model=Application)
-async def update_application(id: str, app: ApplicationUpdate):
+async def update_application(id: str, app: ApplicationUpdate, current_user: User = Depends(get_current_user)):
     query = "UPDATE applications SET name = COALESCE(%s, name), comments = COALESCE(%s, comments) WHERE id = %s RETURNING *"
     rows = await execute_query(query, (app.name, app.comments, id))
     if not rows:
@@ -55,7 +82,7 @@ async def update_application(id: str, app: ApplicationUpdate):
     return Application(**rows[0], configuration_ids=[])
 
 @router.delete("/applications/{id}", status_code=204)
-async def delete_application(id: str):
+async def delete_application(id: str, current_user: User = Depends(get_current_user)):
     query = """
     WITH deleted_configs AS (
         DELETE FROM configurations WHERE application_id = %s
@@ -70,7 +97,7 @@ async def delete_application(id: str):
 # Configurations Endpoints
 
 @router.post("/configurations", response_model=Configuration)
-async def create_configuration(config: ConfigurationCreate):
+async def create_configuration(config: ConfigurationCreate, current_user: User = Depends(get_current_user)):
     config_id = ulid.ULID()
     query = """
     INSERT INTO configurations (id, application_id, name, comments, config)
@@ -86,7 +113,7 @@ async def create_configuration(config: ConfigurationCreate):
     return Configuration(id=str(config_id), **config.model_dump())
 
 @router.get("/configurations/{id}", response_model=Configuration)
-async def get_configuration(id: str):
+async def get_configuration(id: str, current_user: User = Depends(get_current_user)):
     query = "SELECT * FROM configurations WHERE id = %s"
     rows = await execute_query(query, (id,))
     if not rows:
@@ -94,7 +121,7 @@ async def get_configuration(id: str):
     return Configuration(**rows[0])
 
 @router.put("/configurations/{id}", response_model=Configuration)
-async def update_configuration(id: str, config: ConfigurationUpdate):
+async def update_configuration(id: str, config: ConfigurationUpdate, current_user: User = Depends(get_current_user)):
     from json import dumps
     query = """
     UPDATE configurations 
@@ -111,7 +138,7 @@ async def update_configuration(id: str, config: ConfigurationUpdate):
     return Configuration(**rows[0])
 
 @router.delete("/configurations/{id}", status_code=204, response_model=None)
-async def delete_configuration(id: str):
+async def delete_configuration(id: str, current_user: User = Depends(get_current_user)):
     query = "DELETE FROM configurations WHERE id = %s RETURNING id"
     rows = await execute_query(query, (id,))
     if not rows:

@@ -10,6 +10,11 @@ export class ApiService {
             ...options.headers,
         };
 
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            (headers as any)['Authorization'] = `Basic ${token}`;
+        }
+
         const config: RequestInit = {
             ...options,
             headers,

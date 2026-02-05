@@ -4,15 +4,26 @@ import './app-detail';
 import './confirmation-dialog';
 import './toast-notification';
 import './config-editor';
+import './login-page';
+import { AuthService } from '../services/auth';
 
 export class AdminApp extends HTMLElement {
   connectedCallback() {
     this.render();
     window.addEventListener('hashchange', () => this.handleRoute());
-    this.handleRoute(); // Initial route
+    // No initial handleRoute call if we replace innerHTML in render based on auth
+    // But if we are auth, we need to handle route.
+    if (AuthService.isAuthenticated()) {
+      this.handleRoute();
+    }
   }
 
   render() {
+    if (!AuthService.isAuthenticated()) {
+      this.innerHTML = '<login-page></login-page>';
+      return;
+    }
+
     this.innerHTML = `
       <style>
         :host {
@@ -34,13 +45,17 @@ export class AdminApp extends HTMLElement {
           margin: 0;
           color: var(--primary-color);
         }
-        nav a {
+        nav a, nav button {
           margin-left: 1rem;
           text-decoration: none;
           color: var(--text-color);
           font-weight: 500;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 1rem;
         }
-        nav a:hover {
+        nav a:hover, nav button:hover {
           color: var(--primary-color);
         }
         main {
@@ -53,11 +68,16 @@ export class AdminApp extends HTMLElement {
         <h1>Admin Console</h1>
         <nav>
           <a href="#apps">Applications</a>
+          <button id="logout-btn">Logout</button>
         </nav>
       </header>
       <main id="router-outlet"></main>
       <toast-notification id="toast"></toast-notification>
     `;
+
+    this.querySelector('#logout-btn')?.addEventListener('click', () => {
+      AuthService.logout();
+    });
   }
 
   handleRoute() {
