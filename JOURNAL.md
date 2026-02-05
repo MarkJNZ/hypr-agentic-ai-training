@@ -166,3 +166,13 @@
 - Input: config-service/, ui/vite.config.ts, READEME.md
 - Output: config-service/.env, config-service/.env.example, ui/vite.config.ts, READEME.md
 - Reflections: Resolved a persistent 500 error preventing the UI from accessing the backend. Identified multiple root causes: port mismatch (Docker 5433 vs Config Service default 5432), IPv6/IPv4 resolution issues on localhost, and missing database migrations (table pplications did not exist). Fixed the schema by running migrations. Fixed connectivity by creating a .env file enforcing 127.0.0.1:5433 and updating ite.config.ts proxy to explicitly use 127.0.0.1. Finally, updated READEME.md with comprehensive "First Time Setup" instructions and created a .env.example file to prevent recurrence.
+
+## Journal Entry 17: Implement Basic Authentication
+
+- Prompt: add basic authentication using a username and password to the config-service. Add a login page to the ui which is the first page to be displayed to the user when accessing the application ui. The username and password must be stored in the postgres database. The password must be stored encrypted in the database using SHA-256 to encrypt the password.
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: config-service/, ui/
+- Output: config-service/migrations/002_create_users_table.sql, config-service/src/config_service/auth.py, config-service/src/config_service/api/routers.py, ui/src/services/auth.ts, ui/src/components/login-page.ts, ui/src/components/admin-app.ts
+- Reflections: Implemented Basic Auth for both backend and frontend. Created a users table and updated APIs to require authentication. Added a Login page and route guards in the UI. During the process, I inadvertently included default credentials in the README and migration comments, which the user flagged as a security risk. I promptly removed these secrets from the codebase and documentation, reinforcing the importance of not committing secrets to source control even for default/dev credentials. Verified the solution with backend scripts and manual UI checks.
