@@ -20,6 +20,8 @@ A repo for the exercises worked through during the hypr-agentic-ai training cour
 2.  **Start the Config Service**:
     ```bash
     cd config-service
+    cp .env.example .env # Create env file (if example exists) or manually create it
+    # Ensure .env contains: DB_URL=postgresql://postgres:postgres@127.0.0.1:5433/config_db
     make setup  # First time only
     make migrate # Run database migrations
     make run

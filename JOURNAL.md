@@ -156,3 +156,13 @@
 - Input: ui/src/components/app-detail.ts
 - Output: ui/src/components/app-detail.ts
 - Reflections: Removed the "Delete" buttons from the configuration list in the application details view because the backend `config-service` does not support deleting individual configurations. Updated `app-detail.ts` to remove the UI elements, their associated event listeners, and the unused `confirmDelete` method and `<confirmation-dialog>` element. Fixed minor syntax errors that occurred during the cleanup process.
+
+## Journal Entry 16: Fix 500 Error and Documentation
+
+- Prompt: the ui at http://localhost:5173/ has an internal server error status code 500 when starting up and displaying the applications page. The GET request to http://localhost:5173/api/v1/applications which is an endpoint of the config service appears to be failing. Shouldn't this endpoint for the config-service be localhost:8000. Please fix this error
+- Mode: Execution
+- Context: Existing Codebase
+- Model: Gemini 3 Pro (High)
+- Input: config-service/, ui/vite.config.ts, READEME.md
+- Output: config-service/.env, config-service/.env.example, ui/vite.config.ts, READEME.md
+- Reflections: Resolved a persistent 500 error preventing the UI from accessing the backend. Identified multiple root causes: port mismatch (Docker 5433 vs Config Service default 5432), IPv6/IPv4 resolution issues on localhost, and missing database migrations (table pplications did not exist). Fixed the schema by running migrations. Fixed connectivity by creating a .env file enforcing 127.0.0.1:5433 and updating ite.config.ts proxy to explicitly use 127.0.0.1. Finally, updated READEME.md with comprehensive "First Time Setup" instructions and created a .env.example file to prevent recurrence.
