@@ -12,6 +12,8 @@ dependencies = [
     "pydantic-settings>=2.0.0,<3.0.0",
     "python-ulid>=2.0.0,<3.0.0",
     "uvicorn>=0.40.0",
+    "httpx>=0.28.0",
+    "PyJWT>=2.8.0",
 ]
 
 [dependency-groups]

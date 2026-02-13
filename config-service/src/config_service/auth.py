@@ -1,44 +1,71 @@
-import base64
-import hashlib
-import secrets
-from typing import Annotated
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Optional
+
+import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import OAuth2PasswordBearer
 
+from .config import settings
 from .db import execute_query
-from .models import User, Token
+from .models import User
 
-security = HTTPBasic()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
 
-def get_password_hash(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+def create_jwt(github_id: int, username: str) -> str:
+    """Create a JWT token for an authenticated user."""
+    payload = {
+        "sub": str(github_id),
+        "username": username,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=24),
+        "iat": datetime.now(timezone.utc),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
 
-async def get_current_user(credentials: Annotated[HTTPBasicCredentials, Depends(security)]) -> User:
-    query = "SELECT * FROM users WHERE username = %s"
-    rows = await execute_query(query, (credentials.username,))
-    
+
+def decode_jwt(token: str) -> dict:
+    """Decode and verify a JWT token."""
+    try:
+        return jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
+
+
+async def get_current_user(
+    token: Annotated[Optional[str], Depends(oauth2_scheme)],
+) -> User:
+    """FastAPI dependency to get the current authenticated user from a Bearer JWT."""
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    payload = decode_jwt(token)
+    github_id = payload.get("sub")
+
+    if github_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        )
+
+    query = "SELECT * FROM users WHERE github_id = %s"
+    rows = await execute_query(query, (int(github_id),))
+
     if not rows:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
+            detail="User not found",
         )
-    
-    user_data = rows[0]
-    user = User(**user_data)
-    
-    if not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    
-    return user
 
-def create_basic_auth_token(username: str, password: str) -> str:
-    user_pass = f"{username}:{password}"
-    return base64.b64encode(user_pass.encode()).decode()
+    return User(**rows[0])

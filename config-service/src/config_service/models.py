@@ -52,7 +52,6 @@ class Configuration(ConfigurationBase):
 class User(BaseModel):
     id: int
     username: str
-    password_hash: str
-
-class Token(BaseModel):
-    token: str
+    github_id: int
+    avatar_url: Optional[str] = None
+    email: Optional[str] = None

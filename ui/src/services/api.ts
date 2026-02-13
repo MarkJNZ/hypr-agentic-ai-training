@@ -12,7 +12,7 @@ export class ApiService {
 
         const token = localStorage.getItem('auth_token');
         if (token) {
-            (headers as any)['Authorization'] = `Basic ${token}`;
+            (headers as any)['Authorization'] = `Bearer ${token}`;
         }
 
         const config: RequestInit = {

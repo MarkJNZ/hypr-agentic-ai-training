@@ -1,45 +1,130 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from pydantic_extra_types.ulid import ULID
+import httpx
 import ulid
 
+from ..config import settings
 from ..db import execute_query
 from ..models import (
     Application, ApplicationCreate, ApplicationUpdate,
     Configuration, ConfigurationCreate, ConfigurationUpdate,
-    User, Token
+    User
 )
-from ..auth import create_basic_auth_token, get_current_user, verify_password, get_password_hash
-
-
+from ..auth import get_current_user, create_jwt
 
 
 router = APIRouter()
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+# --- Auth Endpoints (mounted at /auth by main.py) ---
 
-@router.post("/login", response_model=Token)
-async def login(login_request: LoginRequest):
-    # We verify against the DB
-    query = "SELECT * FROM users WHERE username = %s"
-    rows = await execute_query(query, (login_request.username,))
-    
-    if not rows:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
-    user_data = rows[0]
-    # In a real app, use the verify_password from auth which hashes
-    # Here just calling verify_password
-    if not verify_password(login_request.password, user_data["password_hash"]):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+auth_router = APIRouter()
 
-    token = create_basic_auth_token(login_request.username, login_request.password)
-    return Token(token=token)
 
-# Applications Endpoints
+@auth_router.get("/login")
+async def auth_login():
+    """Redirect to GitHub OAuth authorization page."""
+    github_auth_url = (
+        f"https://github.com/login/oauth/authorize"
+        f"?client_id={settings.github_client_id}"
+        f"&scope=read:user user:email"
+    )
+    return RedirectResponse(url=github_auth_url)
+
+
+@auth_router.get("/callback")
+async def auth_callback(code: str = Query(...)):
+    """Handle GitHub OAuth callback — exchange code for token, upsert user, issue JWT."""
+
+    # Exchange the authorization code for an access token
+    async with httpx.AsyncClient() as client:
+        token_response = await client.post(
+            "https://github.com/login/oauth/access_token",
+            json={
+                "client_id": settings.github_client_id,
+                "client_secret": settings.github_client_secret,
+                "code": code,
+            },
+            headers={"Accept": "application/json"},
+        )
+
+    token_data = token_response.json()
+    access_token = token_data.get("access_token")
+
+    if not access_token:
+        error = token_data.get("error_description", "Failed to get access token")
+        raise HTTPException(status_code=400, detail=error)
+
+    # Fetch user profile from GitHub
+    async with httpx.AsyncClient() as client:
+        user_response = await client.get(
+            "https://api.github.com/user",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/json",
+            },
+        )
+
+    if user_response.status_code != 200:
+        raise HTTPException(status_code=400, detail="Failed to fetch GitHub user profile")
+
+    github_user = user_response.json()
+    github_id = github_user["id"]
+    username = github_user["login"]
+    avatar_url = github_user.get("avatar_url")
+    email = github_user.get("email")
+
+    # Try to get email from emails endpoint if not public
+    if not email:
+        async with httpx.AsyncClient() as client:
+            emails_response = await client.get(
+                "https://api.github.com/user/emails",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/json",
+                },
+            )
+        if emails_response.status_code == 200:
+            emails = emails_response.json()
+            primary_emails = [e for e in emails if e.get("primary")]
+            if primary_emails:
+                email = primary_emails[0]["email"]
+
+    # Upsert user in database
+    upsert_query = """
+    INSERT INTO users (username, github_id, avatar_url, email)
+    VALUES (%s, %s, %s, %s)
+    ON CONFLICT (github_id)
+    DO UPDATE SET username = EXCLUDED.username,
+                  avatar_url = EXCLUDED.avatar_url,
+                  email = EXCLUDED.email
+    RETURNING *
+    """
+    await execute_query(upsert_query, (username, github_id, avatar_url, email))
+
+    # Create JWT
+    jwt_token = create_jwt(github_id, username)
+
+    # Redirect back to UI with token
+    redirect_url = f"{settings.ui_url}/#auth/callback?token={jwt_token}"
+    return RedirectResponse(url=redirect_url)
+
+
+@auth_router.get("/me")
+async def auth_me(current_user: User = Depends(get_current_user)):
+    """Return the currently authenticated user's info."""
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "github_id": current_user.github_id,
+        "avatar_url": current_user.avatar_url,
+        "email": current_user.email,
+    }
+
+
+# --- Applications Endpoints ---
 
 @router.post("/applications", response_model=Application)
 async def create_application(app: ApplicationCreate, current_user: User = Depends(get_current_user)):
@@ -94,7 +179,7 @@ async def delete_application(id: str, current_user: User = Depends(get_current_u
         raise HTTPException(status_code=404, detail="Application not found")
     return
 
-# Configurations Endpoints
+# --- Configurations Endpoints ---
 
 @router.post("/configurations", response_model=Configuration)
 async def create_configuration(config: ConfigurationCreate, current_user: User = Depends(get_current_user)):

@@ -1,18 +1,11 @@
-import { ApiService } from './api';
-
 export class AuthService {
-    static async login(username: string, password: string): Promise<boolean> {
-        try {
-            const response = await ApiService.post<{ token: string }>('/login', { username, password });
-            if (response && response.token) {
-                localStorage.setItem('auth_token', response.token);
-                return true;
-            }
-            return false;
-        } catch (e) {
-            console.error('Login failed', e);
-            return false;
-        }
+    static loginWithGitHub(): void {
+        // Redirect to the backend auth endpoint which will redirect to GitHub
+        window.location.href = '/auth/login';
+    }
+
+    static handleCallback(token: string): void {
+        localStorage.setItem('auth_token', token);
     }
 
     static logout() {
@@ -23,5 +16,9 @@ export class AuthService {
 
     static isAuthenticated(): boolean {
         return !!localStorage.getItem('auth_token');
+    }
+
+    static getToken(): string | null {
+        return localStorage.getItem('auth_token');
     }
 }

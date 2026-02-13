@@ -9,13 +9,51 @@ import { AuthService } from '../services/auth';
 
 export class AdminApp extends HTMLElement {
   connectedCallback() {
+    // Handle OAuth callback before rendering
+    this.handleOAuthCallback();
+
     this.render();
-    window.addEventListener('hashchange', () => this.handleRoute());
+    window.addEventListener('hashchange', () => {
+      // Check for OAuth callback on hash changes too
+      if (this.handleOAuthCallback()) return;
+      this.handleRoute();
+    });
     // No initial handleRoute call if we replace innerHTML in render based on auth
     // But if we are auth, we need to handle route.
     if (AuthService.isAuthenticated()) {
       this.handleRoute();
     }
+  }
+
+  /**
+   * Check if the current hash is an OAuth callback and handle it.
+   * Returns true if it was a callback (so we can skip normal routing).
+   */
+  private handleOAuthCallback(): boolean {
+    const hash = window.location.hash;
+    if (hash.startsWith('#auth/callback')) {
+      // Extract token from query params in hash
+      // Format: #auth/callback?token=XYZ
+      const queryString = hash.split('?')[1];
+      if (queryString) {
+        const params = new URLSearchParams(queryString);
+        const token = params.get('token');
+        if (token) {
+          AuthService.handleCallback(token);
+          window.location.hash = '#apps';
+          window.location.reload();
+          return true;
+        }
+      }
+      // If no token, show error
+      const errorParam = new URLSearchParams(hash.split('?')[1] || '');
+      if (errorParam.get('error')) {
+        console.error('OAuth error:', errorParam.get('error'));
+      }
+      window.location.hash = '';
+      return true;
+    }
+    return false;
   }
 
   render() {
