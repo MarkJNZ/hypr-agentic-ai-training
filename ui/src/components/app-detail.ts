@@ -55,9 +55,9 @@ export class AppDetail extends HTMLElement {
       <style>
         :host { display: block; }
         .header { margin-bottom: 2rem; }
-        h2 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
-        .description { color: #6b7280; margin-bottom: 1rem; }
-        .meta { font-size: 0.875rem; color: #9ca3af; font-family: monospace; }
+        h2 { margin: 0 0 0.5rem 0; font-size: 1.5rem; color: var(--text-color); }
+        .description { color: var(--text-secondary); margin-bottom: 1rem; }
+        .meta { font-size: 0.875rem; color: var(--text-muted); font-family: monospace; }
         
         .section-header {
            display: flex;
@@ -66,30 +66,32 @@ export class AppDetail extends HTMLElement {
            margin-top: 2rem;
            margin-bottom: 1rem;
            padding-bottom: 0.5rem;
-           border-bottom: 1px solid #e5e7eb;
+           border-bottom: 1px solid var(--border-color);
         }
-        h3 { margin: 0; font-size: 1.125rem; }
+        h3 { margin: 0; font-size: 1.125rem; color: var(--text-color); }
         
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
-        th { background: #f9fafb; font-weight: 600; color: #4b5563; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 0.5rem; overflow: hidden; box-shadow: var(--shadow); }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-color); }
+        th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); }
         
         button {
           padding: 0.5rem 1rem;
           border-radius: 0.375rem;
-          border: 1px solid #d1d5db;
+          border: 1px solid var(--input-border);
           cursor: pointer;
+          color: var(--text-color);
+          background: var(--card-bg);
         }
-        .btn-primary { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .btn-primary { background: var(--primary-color); color: white; border-color: var(--primary-color); }
         .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
-        .btn-danger { background: #ef4444; color: white; border-color: #ef4444; }
+        .btn-danger { background: var(--danger-color); color: white; border-color: var(--danger-color); }
         
-        .no-data { color: #6b7280; font-style: italic; padding: 1rem; }
+        .no-data { color: var(--text-secondary); font-style: italic; padding: 1rem; }
       </style>
       
       <div class="header">
         <confirmation-dialog id="confirm-dialog"></confirmation-dialog>
-        <a href="#apps" style="text-decoration: none; color: #6b7280; font-size: 0.875rem;">&larr; Back to Apps</a>
+        <a href="#apps" style="text-decoration: none; color: var(--text-secondary); font-size: 0.875rem;">&larr; Back to Apps</a>
         ${this.app ? `
             <div style="margin-top: 1rem;">
                 <h2>${this.app.name}</h2>

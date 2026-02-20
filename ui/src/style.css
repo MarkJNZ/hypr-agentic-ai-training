@@ -2,15 +2,46 @@
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
   --danger-color: #ef4444;
+  --danger-hover: #dc2626;
   --text-color: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
   --bg-color: #f3f4f6;
+  --bg-secondary: #f9fafb;
   --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
   --border-color: #e5e7eb;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --font-family: 'Inter', system-ui, sans-serif;
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --link-color: #3b82f6;
+  --dialog-bg: #ffffff;
+  --dialog-footer-bg: #f9fafb;
+}
+
+[data-theme="dark"] {
+  --primary-color: #60a5fa;
+  --primary-hover: #3b82f6;
+  --danger-color: #f87171;
+  --danger-hover: #ef4444;
+  --text-color: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --bg-color: #111827;
+  --bg-secondary: #1f2937;
+  --card-bg: #1e293b;
+  --input-bg: #1e293b;
+  --input-border: #374151;
+  --border-color: #374151;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --link-color: #60a5fa;
+  --dialog-bg: #1e293b;
+  --dialog-footer-bg: #1f2937;
 }
 
 body {
@@ -19,6 +50,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
@@ -34,7 +66,8 @@ button {
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: 0.25rem;
   border: 1px solid var(--border-color);
-  background: white;
+  background: var(--card-bg);
+  color: var(--text-color);
   font-size: 1rem;
 }
 

@@ -3,25 +3,25 @@ import { Application } from '../models/types';
 import { showToast } from './toast-notification';
 
 export class AppList extends HTMLElement {
-    private apps: Application[] = [];
+  private apps: Application[] = [];
 
-    async connectedCallback() {
-        this.attachShadow({ mode: 'open' });
-        this.render();
-        await this.fetchApps();
+  async connectedCallback() {
+    this.attachShadow({ mode: 'open' });
+    this.render();
+    await this.fetchApps();
+  }
+
+  async fetchApps() {
+    try {
+      this.apps = await ApiService.get<Application[]>('/applications');
+      this.renderList();
+    } catch (error: any) {
+      showToast(error.message, 'error');
     }
+  }
 
-    async fetchApps() {
-        try {
-            this.apps = await ApiService.get<Application[]>('/applications');
-            this.renderList();
-        } catch (error: any) {
-            showToast(error.message, 'error');
-        }
-    }
-
-    render() {
-        this.shadowRoot!.innerHTML = `
+  render() {
+    this.shadowRoot!.innerHTML = `
       <style>
         :host { display: block; }
         .header {
@@ -30,37 +30,39 @@ export class AppList extends HTMLElement {
           align-items: center;
           margin-bottom: 2rem;
         }
-        h2 { margin: 0; font-size: 1.5rem; }
+        h2 { margin: 0; font-size: 1.5rem; color: var(--text-color); }
         .controls { display: flex; gap: 1rem; }
         input[type="text"] {
           padding: 0.5rem;
-          border: 1px solid #d1d5db;
+          border: 1px solid var(--input-border);
           border-radius: 0.375rem;
           min-width: 250px;
+          background: var(--input-bg);
+          color: var(--text-color);
         }
         button {
           padding: 0.5rem 1rem;
-          background: #3b82f6;
+          background: var(--primary-color);
           color: white;
           border: none;
           border-radius: 0.375rem;
           cursor: pointer;
           font-weight: 500;
         }
-        button:hover { background: #2563eb; }
+        button:hover { background: var(--primary-hover); }
         
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
-        th { background: #f9fafb; font-weight: 600; color: #4b5563; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 0.5rem; overflow: hidden; box-shadow: var(--shadow); }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); }
         tr:last-child td { border-bottom: none; }
-        tr:hover { background: #f9fafb; }
+        tr:hover { background: var(--bg-secondary); }
         
         .actions { display: flex; gap: 0.5rem; }
         .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
-        .btn-outline { background: white; border: 1px solid #d1d5db; color: #374151; }
-        .btn-outline:hover { background: #f3f4f6; }
-        .btn-danger { background: #ef4444; }
-        .btn-danger:hover { background: #dc2626; }
+        .btn-outline { background: var(--card-bg); border: 1px solid var(--input-border); color: var(--text-color); }
+        .btn-outline:hover { background: var(--bg-secondary); }
+        .btn-danger { background: var(--danger-color); }
+        .btn-danger:hover { background: var(--danger-hover); }
       </style>
       
       <div class="header">
@@ -78,31 +80,31 @@ export class AppList extends HTMLElement {
       <confirmation-dialog id="confirm"></confirmation-dialog>
     `;
 
-        this.shadowRoot!.getElementById('create-btn')?.addEventListener('click', () => {
-            window.location.hash = 'apps/create';
-        });
+    this.shadowRoot!.getElementById('create-btn')?.addEventListener('click', () => {
+      window.location.hash = 'apps/create';
+    });
 
-        this.shadowRoot!.getElementById('search')?.addEventListener('input', (e) => {
-            const term = (e.target as HTMLInputElement).value.toLowerCase();
-            this.renderList(term);
-        });
+    this.shadowRoot!.getElementById('search')?.addEventListener('input', (e) => {
+      const term = (e.target as HTMLInputElement).value.toLowerCase();
+      this.renderList(term);
+    });
+  }
+
+  renderList(filter = '') {
+    const container = this.shadowRoot!.getElementById('list-container');
+    if (!container) return;
+
+    if (this.apps.length === 0) {
+      container.innerHTML = '<p>No applications found.</p>';
+      return;
     }
 
-    renderList(filter = '') {
-        const container = this.shadowRoot!.getElementById('list-container');
-        if (!container) return;
+    const filtered = this.apps.filter(app =>
+      app.name.toLowerCase().includes(filter) ||
+      app.comments.toLowerCase().includes(filter)
+    );
 
-        if (this.apps.length === 0) {
-            container.innerHTML = '<p>No applications found.</p>';
-            return;
-        }
-
-        const filtered = this.apps.filter(app =>
-            app.name.toLowerCase().includes(filter) ||
-            app.comments.toLowerCase().includes(filter)
-        );
-
-        const html = `
+    const html = `
       <table>
         <thead>
           <tr>
@@ -115,9 +117,9 @@ export class AppList extends HTMLElement {
         <tbody>
           ${filtered.map(app => `
             <tr>
-              <td><a href="#apps/${app.id}" style="font-weight: 600; color: #3b82f6; text-decoration: none;">${app.name}</a></td>
+              <td><a href="#apps/${app.id}" style="font-weight: 600; color: var(--link-color); text-decoration: none;">${app.name}</a></td>
               <td>${app.comments}</td>
-              <td style="font-family: monospace; color: #6b7280; font-size: 0.85em;">${app.id}</td>
+              <td style="font-family: monospace; color: var(--text-muted); font-size: 0.85em;">${app.id}</td>
               <td class="actions">
                 <button class="btn-sm btn-outline ed-btn" data-id="${app.id}">Edit</button>
                 <button class="btn-sm btn-danger del-btn" data-id="${app.id}">Delete</button>
@@ -128,34 +130,34 @@ export class AppList extends HTMLElement {
       </table>
     `;
 
-        container.innerHTML = html;
+    container.innerHTML = html;
 
-        container.querySelectorAll('.ed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = (e.target as HTMLElement).dataset.id;
-                window.location.hash = `apps/edit/${id}`;
-            });
-        });
+    container.querySelectorAll('.ed-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).dataset.id;
+        window.location.hash = `apps/edit/${id}`;
+      });
+    });
 
-        container.querySelectorAll('.del-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = (e.target as HTMLElement).dataset.id;
-                this.confirmDelete(id!);
-            });
-        });
-    }
+    container.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).dataset.id;
+        this.confirmDelete(id!);
+      });
+    });
+  }
 
-    confirmDelete(id: string) {
-        const dialog = this.shadowRoot!.getElementById('confirm') as any;
-        dialog.open('Are you sure you want to delete this application? This cannot be undone.', async () => {
-            try {
-                await ApiService.delete(`/applications/${id}`);
-                showToast('Application deleted');
-                await this.fetchApps();
-            } catch (e: any) {
-                showToast(e.message, 'error');
-            }
-        });
-    }
+  confirmDelete(id: string) {
+    const dialog = this.shadowRoot!.getElementById('confirm') as any;
+    dialog.open('Are you sure you want to delete this application? This cannot be undone.', async () => {
+      try {
+        await ApiService.delete(`/applications/${id}`);
+        showToast('Application deleted');
+        await this.fetchApps();
+      } catch (e: any) {
+        showToast(e.message, 'error');
+      }
+    });
+  }
 }
 customElements.define('app-list', AppList);

@@ -56,34 +56,36 @@ export class AppForm extends HTMLElement {
         this.shadowRoot!.innerHTML = `
       <style>
         :host { display: block; max-width: 600px; margin: 0 auto; }
-        h2 { margin-bottom: 1.5rem; font-size: 1.5rem; }
+        h2 { margin-bottom: 1.5rem; font-size: 1.5rem; color: var(--text-color); }
         .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem; color: var(--text-color); }
         input, textarea {
           width: 100%;
           padding: 0.5rem;
-          border: 1px solid #d1d5db;
+          border: 1px solid var(--input-border);
           border-radius: 0.375rem;
           font-family: inherit;
+          background: var(--input-bg);
+          color: var(--text-color);
         }
         input:focus, textarea:focus {
            outline: none;
-           border-color: #3b82f6;
-           box-shadow: 0 0 0 1px #3b82f6;
+           border-color: var(--primary-color);
+           box-shadow: 0 0 0 1px var(--primary-color);
         }
         textarea { height: 100px; resize: vertical; }
         .actions { display: flex; gap: 1rem; margin-top: 2rem; }
         button {
           padding: 0.5rem 1rem;
           border-radius: 0.375rem;
-          border: 1px solid #d1d5db;
+          border: 1px solid var(--input-border);
           cursor: pointer;
           font-weight: 500;
         }
-        .btn-primary { background: #3b82f6; color: white; border-color: #3b82f6; }
-        .btn-primary:hover { background: #2563eb; }
-        .btn-secondary { background: white; color: #374151; }
-        .btn-secondary:hover { background: #f3f4f6; }
+        .btn-primary { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--card-bg); color: var(--text-color); }
+        .btn-secondary:hover { background: var(--bg-secondary); }
       </style>
       
       <h2 id="page-title">Create Application</h2>

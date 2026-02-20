@@ -70,25 +70,25 @@ export class ConfigEditor extends HTMLElement {
         this.shadowRoot!.innerHTML = `
       <style>
         :host { display: block; max-width: 800px; margin: 0 auto; }
-        h2 { margin-bottom: 1.5rem; }
+        h2 { margin-bottom: 1.5rem; color: var(--text-color); }
         .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-        input[type="text"], textarea { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-family: inherit; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-color); }
+        input[type="text"], textarea { width: 100%; padding: 0.5rem; border: 1px solid var(--input-border); border-radius: 0.375rem; font-family: inherit; background: var(--input-bg); color: var(--text-color); }
         .controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
         
         /* KV Editor Styles */
         .kv-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
         .kv-key { flex: 1; }
         .kv-val { flex: 2; }
-        .btn-icon { padding: 0.5rem; color: #ef4444; border: 1px solid #d1d5db; background: white; cursor: pointer; border-radius: 0.25rem; }
+        .btn-icon { padding: 0.5rem; color: var(--danger-color); border: 1px solid var(--input-border); background: var(--card-bg); cursor: pointer; border-radius: 0.25rem; }
         
         .hidden { display: none; }
         
-        button { padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid #d1d5db; cursor: pointer; font-weight: 500; }
-        .btn-primary { background: #3b82f6; color: white; border-color: #3b82f6; }
-        .btn-secondary { background: white; }
+        button { padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid var(--input-border); cursor: pointer; font-weight: 500; color: var(--text-color); background: var(--card-bg); }
+        .btn-primary { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .btn-secondary { background: var(--card-bg); color: var(--text-color); }
         
-        .mode-toggle { margin-bottom: 1rem; }
+        .mode-toggle { margin-bottom: 1rem; color: var(--text-color); }
       </style>
       
       <h2 id="page-title">Create Configuration</h2>

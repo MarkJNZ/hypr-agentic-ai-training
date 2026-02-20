@@ -5,6 +5,7 @@ import './confirmation-dialog';
 import './toast-notification';
 import './config-editor';
 import './login-page';
+import './theme-toggle';
 import { AuthService } from '../services/auth';
 
 export class AdminApp extends HTMLElement {
@@ -83,6 +84,10 @@ export class AdminApp extends HTMLElement {
           margin: 0;
           color: var(--primary-color);
         }
+        nav {
+          display: flex;
+          align-items: center;
+        }
         nav a, nav button {
           margin-left: 1rem;
           text-decoration: none;
@@ -92,6 +97,7 @@ export class AdminApp extends HTMLElement {
           border: none;
           cursor: pointer;
           font-size: 1rem;
+          transition: color 0.2s ease;
         }
         nav a:hover, nav button:hover {
           color: var(--primary-color);
@@ -106,6 +112,7 @@ export class AdminApp extends HTMLElement {
         <h1>Admin Console</h1>
         <nav>
           <a href="#apps">Applications</a>
+          <theme-toggle></theme-toggle>
           <button id="logout-btn">Logout</button>
         </nav>
       </header>
