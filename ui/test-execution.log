@@ -1,0 +1,69 @@
+
+Running 21 tests using 8 workers
+
+[1A[2K[1/21] [firefox] ΓÇ║ app-detail.spec.ts:42:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate to add configuration page
+[1A[2K[2/21] [firefox] ΓÇ║ app-detail.spec.ts:24:5 ΓÇ║ Application Detail Page ΓÇ║ should render application details and configuration list
+[1A[2K[3/21] [firefox] ΓÇ║ app-detail.spec.ts:49:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate back to app list
+[1A[2K[4/21] [firefox] ΓÇ║ config-editor.spec.ts:45:5 ΓÇ║ Configuration Editor Page ΓÇ║ should toggle to JSON mode
+[1A[2K[5/21] [firefox] ΓÇ║ app-detail.spec.ts:24:5 ΓÇ║ Application Detail Page ΓÇ║ should render application details and configuration list
+[1A[2K[6/21] [firefox] ΓÇ║ config-editor.spec.ts:24:5 ΓÇ║ Configuration Editor Page ΓÇ║ should render form fields in visual mode by default
+[1A[2K[7/21] [firefox] ΓÇ║ config-editor.spec.ts:55:5 ΓÇ║ Configuration Editor Page ΓÇ║ should add and remove key-value rows in visual mode
+[1A[2K[8/21] [firefox] ΓÇ║ config-editor.spec.ts:75:5 ΓÇ║ Configuration Editor Page ΓÇ║ should navigate back when Cancel is clicked
+[1A[2K[9/21] [firefox] ΓÇ║ app-detail.spec.ts:42:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate to add configuration page
+[1A[2K[2m[WebServer] [22m[2m4:59:50ΓÇ»pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/applications[39m
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1487:16)
+
+[1A[2K[10/21] [firefox] ΓÇ║ config-editor.spec.ts:24:5 ΓÇ║ Configuration Editor Page ΓÇ║ should render form fields in visual mode by default
+[1A[2K[11/21] [firefox] ΓÇ║ app-detail.spec.ts:49:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate back to app list
+[1A[2K[12/21] [firefox] ΓÇ║ config-editor.spec.ts:55:5 ΓÇ║ Configuration Editor Page ΓÇ║ should add and remove key-value rows in visual mode
+[1A[2K[13/21] [firefox] ΓÇ║ config-editor.spec.ts:75:5 ΓÇ║ Configuration Editor Page ΓÇ║ should navigate back when Cancel is clicked
+[1A[2K[14/21] [firefox] ΓÇ║ config-editor.spec.ts:45:5 ΓÇ║ Configuration Editor Page ΓÇ║ should toggle to JSON mode
+[1A[2K[15/21] [firefox] ΓÇ║ app-detail.spec.ts:24:5 ΓÇ║ Application Detail Page ΓÇ║ should render application details and configuration list
+[1A[2K[16/21] [firefox] ΓÇ║ app-detail.spec.ts:42:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate to add configuration page
+[1A[2K[17/21] [firefox] ΓÇ║ app-detail.spec.ts:49:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate back to app list
+
+[1A[2K[2m[WebServer] [22m[2m4:59:59ΓÇ»pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/applications[39m
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1487:16)
+[1A[2K[18/21] [firefox] ΓÇ║ config-editor.spec.ts:75:5 ΓÇ║ Configuration Editor Page ΓÇ║ should navigate back when Cancel is clicked
+
+[1A[2K[2m[WebServer] [22m[2m5:00:00ΓÇ»pm[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/applications[39m
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1487:16)
+[1A[2K[19/21] [firefox] ΓÇ║ config-editor.spec.ts:24:5 ΓÇ║ Configuration Editor Page ΓÇ║ should render form fields in visual mode by default
+[1A[2K[20/21] [firefox] ΓÇ║ config-editor.spec.ts:45:5 ΓÇ║ Configuration Editor Page ΓÇ║ should toggle to JSON mode
+[1A[2K[21/21] [firefox] ΓÇ║ config-editor.spec.ts:55:5 ΓÇ║ Configuration Editor Page ΓÇ║ should add and remove key-value rows in visual mode
+[1A[2K[22/21] (retries) [firefox] ΓÇ║ app-detail.spec.ts:42:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate to add configuration page (retry #1)
+[1A[2K  1) [firefox] ΓÇ║ app-detail.spec.ts:42:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate to add configuration page 
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      2 |
+      3 | test.describe('Application Detail Page', () => {
+    > 4 |     test.beforeEach(async ({ page }) => {
+        |          ^
+      5 |         await page.route('**/api/v1/applications/123', async route => {
+      6 |             await route.fulfill({ json: { id: '123', name: 'Test App', comments: 'Test Desc', configurationIds: ['conf1'] } });
+      7 |         });
+
+        at C:\Users\Mark\source\repos\agentic_ai\src\ui\tests\e2e\app-detail.spec.ts:4:10
+
+    Error: page.waitForTimeout: Target page, context or browser has been closed
+
+      17 |             } catch (error) {
+      18 |                 if (i === 2) throw error;
+    > 19 |                 await page.waitForTimeout(500); // wait before retry
+         |                            ^
+      20 |             }
+      21 |         }
+      22 |     });
+
+        at C:\Users\Mark\source\repos\agentic_ai\src\ui\tests\e2e\app-detail.spec.ts:19:28
+
+
+[1A[2K  1 flaky
+    [firefox] ΓÇ║ app-detail.spec.ts:42:5 ΓÇ║ Application Detail Page ΓÇ║ should navigate to add configuration page 
+  20 passed (47.8s)
+
+  Serving HTML report at http://localhost:49955. Press Ctrl+C to quit.
