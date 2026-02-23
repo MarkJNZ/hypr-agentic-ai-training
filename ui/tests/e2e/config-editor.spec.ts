@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { navigateWithRetry } from './helpers';
 
 test.describe('Configuration Editor Page', () => {
     test.beforeEach(async ({ page }) => {
@@ -12,16 +13,7 @@ test.describe('Configuration Editor Page', () => {
             await route.fulfill({ json: { id: 'new-conf', name: 'Config', comments: 'Desc' } });
         });
         await page.addInitScript(() => window.localStorage.setItem('auth_token', 'test-token'));
-        // Retry navigation up to 3 times to mitigate Firefox NS_ERROR_CONNECTION_REFUSED
-        for (let i = 0; i < 3; i++) {
-            try {
-                await page.goto('/#configs/create/123', { waitUntil: 'load', timeout: 10000 });
-                break;
-            } catch (error) {
-                if (i === 2) throw error;
-                await page.waitForTimeout(500); // wait before retry
-            }
-        }
+        await navigateWithRetry(page, '/#configs/create/123', 'text=Create Configuration');
     });
 
     test('should render form fields in visual mode by default', async ({ page }) => {

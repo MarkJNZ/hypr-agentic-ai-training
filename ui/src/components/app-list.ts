@@ -94,15 +94,15 @@ export class AppList extends HTMLElement {
     const container = this.shadowRoot!.getElementById('list-container');
     if (!container) return;
 
-    if (this.apps.length === 0) {
-      container.innerHTML = '<p>No applications found.</p>';
-      return;
-    }
-
     const filtered = this.apps.filter(app =>
       app.name.toLowerCase().includes(filter) ||
       app.comments.toLowerCase().includes(filter)
     );
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p>No applications found.</p>';
+      return;
+    }
 
     const html = `
       <table>

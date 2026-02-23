@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { navigateWithRetry } from './helpers';
 
 test.describe('Application Detail Page', () => {
     test.beforeEach(async ({ page }) => {
@@ -12,16 +13,7 @@ test.describe('Application Detail Page', () => {
             await route.fulfill({ json: { id: 'conf1', name: 'Config 1', comments: 'Test Conf Desc' } });
         });
         await page.addInitScript(() => window.localStorage.setItem('auth_token', 'test-token'));
-        // Retry navigation up to 3 times to mitigate Firefox NS_ERROR_CONNECTION_REFUSED
-        for (let i = 0; i < 3; i++) {
-            try {
-                await page.goto('/#apps/123', { waitUntil: 'load', timeout: 10000 });
-                break;
-            } catch (error) {
-                if (i === 2) throw error;
-                await page.waitForTimeout(500); // wait before retry
-            }
-        }
+        await navigateWithRetry(page, '/#apps/123', 'text=Configurations');
     });
 
     test('should render application details and configuration list', async ({ page }) => {

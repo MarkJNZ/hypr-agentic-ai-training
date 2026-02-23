@@ -4,3 +4,15 @@ dist-ssr
 *.local
 .DS_Store
 coverage
+
+# Lockfiles
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
