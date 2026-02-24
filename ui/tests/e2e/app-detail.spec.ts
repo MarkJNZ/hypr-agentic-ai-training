@@ -13,36 +13,33 @@ test.describe('Application Detail Page', () => {
             await route.fulfill({ json: { id: 'conf1', name: 'Config 1', comments: 'Test Conf Desc' } });
         });
         await page.addInitScript(() => window.localStorage.setItem('auth_token', 'test-token'));
-        await navigateWithRetry(page, '/#apps/123', 'text=Configurations');
+        await navigateWithRetry(page, '/#apps/123', page.getByRole('heading', { name: 'Configurations' }));
     });
 
     test('should render application details and configuration list', async ({ page }) => {
         // Check Back to Apps link
-        const backLink = page.locator('a', { hasText: 'Back to Apps' });
+        const backLink = page.getByRole('link', { name: 'Back to Apps' });
         await expect(backLink).toBeVisible();
 
         // Check Add Configuration button
-        const addConfigBtn = page.locator('#add-config');
+        const addConfigBtn = page.getByRole('button', { name: 'Add Configuration' });
         await expect(addConfigBtn).toBeVisible();
-        await expect(addConfigBtn).toHaveText('Add Configuration');
 
         // Check configuration list section
-        const configHeader = page.locator('h3', { hasText: 'Configurations' });
-        await expect(configHeader).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Configurations' })).toBeVisible();
 
-        const configList = page.locator('#config-list');
-        await expect(configList).toBeVisible();
+        await expect(page.locator('#config-list')).toBeVisible();
     });
 
     test('should navigate to add configuration page', async ({ page }) => {
-        await page.locator('#add-config').click();
+        await page.getByRole('button', { name: 'Add Configuration' }).click();
 
         // Assert URL changes to create config with appId
         await expect(page).toHaveURL(/.*#configs\/create\/123/);
     });
 
     test('should navigate back to app list', async ({ page }) => {
-        await page.locator('a', { hasText: 'Back to Apps' }).click();
+        await page.getByRole('link', { name: 'Back to Apps' }).click();
         await expect(page).toHaveURL(/.*#apps$/);
     });
 });

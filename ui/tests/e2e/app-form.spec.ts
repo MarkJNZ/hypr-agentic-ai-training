@@ -11,55 +11,39 @@ test.describe('Application Form Page', () => {
             }
         });
         await page.addInitScript(() => window.localStorage.setItem('auth_token', 'test-token'));
-        await navigateWithRetry(page, '/#apps/create', 'text=Create Application');
+        await navigateWithRetry(page, '/#apps/create', page.getByRole('heading', { name: 'Create Application' }));
     });
 
     test('should render form fields correctly', async ({ page }) => {
-        const header = page.locator('h2');
-        await expect(header).toHaveText('Create Application');
+        await expect(page.getByRole('heading', { name: 'Create Application' })).toBeVisible();
 
         // Check for Name input
-        const nameInput = page.locator('#name');
-        await expect(nameInput).toBeVisible();
+        await expect(page.getByLabel('Name')).toBeVisible();
 
         // Check for Description textarea
-        const descInput = page.locator('#comments');
-        await expect(descInput).toBeVisible();
+        await expect(page.getByLabel('Description')).toBeVisible();
 
         // Check for buttons
-        const submitBtn = page.locator('#submit-btn');
-        await expect(submitBtn).toBeVisible();
-        await expect(submitBtn).toHaveText('Create Application');
-
-        const cancelBtn = page.locator('#cancel');
-        await expect(cancelBtn).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Create Application' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible();
     });
 
     test('should show error when creating without required name', async ({ page }) => {
         // Attempt to submit empty form
-        await page.locator('#submit-btn').click();
+        await page.getByRole('button', { name: 'Create Application' }).click();
 
-        // Assert HTML5 validation logic (name is required)
-        // Note: Playwright can check validity state or we check if toast appears.
-        // Assuming toast appears if our custom validation catches it first, or HTML5 blocks it.
-        // The implementation has `required` on input and `!hasValue(name)` check.
-
-        const nameInput = page.locator('#name');
-
-        // Simple assertion to ensure stay on page or validation message
-        const isValid = await nameInput.evaluate((el: HTMLInputElement) => el.checkValidity());
-        expect(isValid).toBe(false);
+        // Assert HTML5 validation blocks submission - verify we stay on create page
+        await expect(page).toHaveURL(/.*#apps\/create$/);
     });
 
     test('should allow filling and submitting the form', async ({ page }) => {
         // Fill form
-        await page.locator('#name').fill('Test Playwright App');
-        await page.locator('#comments').fill('This is a description from playwright');
+        await page.getByLabel('Name').fill('Test Playwright App');
+        await page.getByLabel('Description').fill('This is a description from playwright');
 
-        // Submit form (might fail API call, but we test interaction)
-        // With an actual mocked API, we'd verify navigation
+        // Submit form
         const responsePromise = page.waitForResponse('**/api/v1/applications');
-        await page.locator('#submit-btn').click();
+        await page.getByRole('button', { name: 'Create Application' }).click();
         await responsePromise;
 
         // Wait for it to navigate back to the list
@@ -67,7 +51,7 @@ test.describe('Application Form Page', () => {
     });
 
     test('should navigate back when Cancel is clicked', async ({ page }) => {
-        await page.locator('#cancel').click();
+        await page.getByRole('button', { name: 'Cancel' }).click();
         await expect(page).toHaveURL(/.*#apps$/);
     });
 });

@@ -14,29 +14,26 @@ test.describe('Application List Page', () => {
 
         // Bypass login
         await page.addInitScript(() => window.localStorage.setItem('auth_token', 'test-token'));
-        await navigateWithRetry(page, '/#apps', '#list-container');
+        await navigateWithRetry(page, '/#apps', page.locator('#list-container'));
     });
 
     test('should display applications list with correct headers and buttons', async ({ page }) => {
-        const header = page.locator('h2');
-        await expect(header).toHaveText('Applications');
+        await expect(page.getByRole('heading', { name: 'Applications' })).toBeVisible();
 
         // Check for Create New App button
-        const createBtn = page.locator('#create-btn', { hasText: 'Create New App' });
+        const createBtn = page.getByRole('button', { name: 'Create New App' });
         await expect(createBtn).toBeVisible();
 
         // Check search field
-        const searchInput = page.locator('#search');
+        const searchInput = page.getByPlaceholder('Search applications...');
         await expect(searchInput).toBeVisible();
-        await expect(searchInput).toHaveAttribute('placeholder', 'Search applications...');
 
         // Wait for list container
-        const listContainer = page.locator('#list-container');
-        await expect(listContainer).toBeVisible();
+        await expect(page.locator('#list-container')).toBeVisible();
     });
 
     test('should navigate to create application page', async ({ page }) => {
-        await page.locator('#create-btn').click();
+        await page.getByRole('button', { name: 'Create New App' }).click();
 
         // Assert URL changes
         await expect(page).toHaveURL(/.*#apps\/create/);
@@ -44,13 +41,12 @@ test.describe('Application List Page', () => {
 
     test('should filter applications when searching', async ({ page }) => {
         // Wait and find the search box
-        const searchInput = page.locator('#search');
+        const searchInput = page.getByPlaceholder('Search applications...');
 
         // Type a filter
         await searchInput.fill('Non Existent App 123');
 
         // Assert empty state or filtered list
-        const noAppsText = page.locator('#list-container p');
-        await expect(noAppsText).toHaveText('No applications found.');
+        await expect(page.getByText('No applications found.')).toBeVisible();
     });
 });
